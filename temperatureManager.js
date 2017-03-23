@@ -6,6 +6,7 @@ const shortid = require('shortid');
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 const putAsync = promisify(dynamo.put, dynamo);
+const scanAsync = promisify(dynamo.scan, dynamo);
 
 const temperatureTableName = process.env.TEMPERATURE_DYNAMODB_TABLE;
 
@@ -25,5 +26,16 @@ module.exports.saveTemperature = (temperature) => {
   .then(() => {
     console.log(`Saving new temperature ${JSON.stringify(item)}`);
     return item;
+  });
+}
+
+module.exports.getTemperatures = () => {
+  const params = {
+    TableName: temperatureTableName,
+  };
+
+  return scanAsync(params)
+  .then(response => {
+    return response.Items
   });
 }

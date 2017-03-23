@@ -34,7 +34,7 @@ events:
 
 10. Check the logs for the Lambda
 
-## Part 2
+## Part 2 - Saving the temperature
 
 Let's imagine that we have a smart sensor that sends the temperature to a server, so it can analyse it, store it and later show it to a user.
 
@@ -160,5 +160,55 @@ module.exports.setTemperature = (event, context, callback) => {
     callback(null, response);
   });
 };
+```
+
+## Part 3 - Getting all the temperatures
+
+
+1. Add the new lambda and api gateway in serverless.yml
+```
+getTemperatures:
+  handler: handler.getTemperatures
+  events:
+    - http:
+        path: temperature
+        method: get
+```
+
+2. Add the new handler method for the Lambda
+```
+module.exports.getTemperatures = (event, context, callback) => {
+  var temperature = event.body;
+
+  temperatureManager.getTemperatures()
+  .then((temperatures) => {
+    const response = {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: temperatures
+      }),
+    };
+
+    callback(null, response);
+  });
+};
+```
+
+3. Add the function in the temperatures Manager to control this
+```
+const scanAsync = promisify(dynamo.scan, dynamo);
+
+module.exports.getTemperatures = () => {
+  const params = {
+    TableName: temperatureTableName,
+  };
+
+  return scanAsync(params)
+  .then(response => {
+    return response.Items
+  });
+}
 
 ```
+
+4. Deploy and test 

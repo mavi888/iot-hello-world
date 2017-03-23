@@ -33,3 +33,19 @@ module.exports.setTemperature = (event, context, callback) => {
     callback(null, response);
   });
 };
+
+module.exports.getTemperatures = (event, context, callback) => {
+  var temperature = event.body;
+
+  temperatureManager.getTemperatures()
+  .then((temperatures) => {
+    const response = {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: temperatures
+      }),
+    };
+
+    callback(null, response);
+  });
+};
