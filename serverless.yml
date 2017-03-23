@@ -26,6 +26,15 @@ provider:
 #  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:Scan"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:DeleteItem"
+      Resource:
+        - arn:aws:dynamodb:us-east-1:388044143604:table/temperatures-table
 #  iamRoleStatements:
 #    - Effect: "Allow"
 #      Action:
@@ -42,8 +51,8 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+  environment:
+    TEMPERATURE_DYNAMODB_TABLE: temperatures-table
 
 # you can add packaging information here
 #package:
@@ -61,6 +70,12 @@ functions:
       - http:
           path: hello
           method: get
+  setTemperature:
+    handler: handler.setTemperature
+    events:
+      - http:
+          path: temperature
+          method: post
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -91,6 +106,21 @@ functions:
 #      variable2: value2
 
 # you can add CloudFormation resource templates here
+resources:
+  Resources:
+    TemperaturesTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: "temperatureId"
+          AttributeType: "S"
+        KeySchema:
+        - AttributeName: "temperatureId"
+          KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: "temperatures-table"
 #resources:
 #  Resources:
 #    NewResource:

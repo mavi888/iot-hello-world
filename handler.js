@@ -1,5 +1,7 @@
 'use strict';
 
+const temperatureManager = require('./temperatureManager');
+
 module.exports.hello = (event, context, callback) => {
   const response = {
     statusCode: 200,
@@ -13,4 +15,21 @@ module.exports.hello = (event, context, callback) => {
 
   // Use this code if you don't use the http event with the LAMBDA-PROXY integration
   // callback(null, { message: 'Go Serverless v1.0! Your function executed successfully!', event });
+};
+
+module.exports.setTemperature = (event, context, callback) => {
+  var temperature = event.body;
+
+  temperatureManager.saveTemperature(temperature)
+  .then(() => {
+    const response = {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: 'Hello iot helsinki the temperature is: ' + temperature,
+        input: event,
+      }),
+    };
+
+    callback(null, response);
+  });
 };
